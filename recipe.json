@@ -1,0 +1,12 @@
+[
+  {
+    "recipeId": 1,
+    "recipeName": "Fried Eggs",
+    "ingredients": ["Eggs", "Salt", "Pepper"]
+  },
+  {
+    "recipeId": 2,
+    "recipeName": "Pasta",
+    "ingredients": ["noodle", "souce"]
+  }
+]
