@@ -14,19 +14,19 @@ class CartApi {
     router.get('/', _cartController.getAllIngredients);
 
     // Show specific ingredient in shopping list
-    router.get('/ingredient/<ingredientId>', _cartController.getIngredientById);
+    router.get('/<cartId>', _cartController.getIngredientById);
 
     // POST: Add ingredient to shopping list
-    router.post('/ingredient', _cartController.addIngredient);
+    router.post('/', _cartController.addIngredient);
 
     // POST: Add ingredient to pantry
-    router.post('/ingredient/<ingredientId>', _cartController.addIngredientToPantry);
+    router.post('/<cartId>', _cartController.addIngredientToPantry);
 
     // PATCH: Update ingredient in shopping list
-    router.patch('/ingredient/<ingredientId>', _cartController.updateIngredient);
+    router.patch('/<cartId>', _cartController.updateIngredient);
 
     // DELETE: Delete ingredient from shopping list
-    router.delete('/ingredient/<ingredientId>', _cartController.deleteIngredient);
+    router.delete('/<cartId>', _cartController.deleteIngredient);
 
     return router;
   }

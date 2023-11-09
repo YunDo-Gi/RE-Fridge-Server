@@ -21,5 +21,5 @@ void main(List<String> args) async {
   final server = await serve(handler, ip, port);
   print('Server listening on port ${server.port}');
 
-  _router.mount('/api', InitApi().handler);
+  _router.mount('/', InitApi().handler);
 }
