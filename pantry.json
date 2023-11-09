@@ -19,5 +19,19 @@
     "expiryDate": "2022-11-01T00:00:00.000Z",
     "quantity": 2,
     "category": "Bakery"
+  },
+  {
+    "ingredientId": 4,
+    "ingredientName": "noodle",
+    "expiryDate": "2022-11-01T00:00:00.000Z",
+    "quantity": 2,
+    "category": "Bakery"
+  },
+  {
+    "ingredientId": 4,
+    "ingredientName": "souce",
+    "expiryDate": "2022-11-01T00:00:00.000Z",
+    "quantity": 2,
+    "category": "Bakery"
   }
 ]

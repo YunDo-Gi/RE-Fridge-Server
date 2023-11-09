@@ -15,7 +15,7 @@ class RecipeController {
 
   getFullfilledRecipes(Request req) async {
     final List ingredients = [];
-    for(var ingredient in pantry) {
+    for (var ingredient in pantry) {
       ingredients.add(ingredient['ingredientName']);
     }
 
@@ -48,6 +48,8 @@ class RecipeController {
       }
 
       // Sort recipes by number of fullfilled ingredients
+      fullfilledRecipes
+          .sort((a, b) => b['fullfillCount'].compareTo(a['fullfillCount']));
 
       return Response.ok(
           json.encode({'success': true, 'data': fullfilledRecipes}),
