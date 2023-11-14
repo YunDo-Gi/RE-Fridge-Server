@@ -32,6 +32,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "buffer",
+      "rootUri": "file:///C:/Users/lvbhk/AppData/Local/Pub/Cache/hosted/pub.dev/buffer-1.2.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "collection",
       "rootUri": "file:///C:/Users/lvbhk/AppData/Local/Pub/Cache/hosted/pub.dev/collection-1.17.2",
       "packageUri": "lib/",
@@ -138,6 +144,18 @@
       "rootUri": "file:///C:/Users/lvbhk/AppData/Local/Pub/Cache/hosted/pub.dev/mime-1.0.4",
       "packageUri": "lib/",
       "languageVersion": "2.18"
+    },
+    {
+      "name": "mysql1",
+      "rootUri": "file:///C:/Users/lvbhk/AppData/Local/Pub/Cache/hosted/pub.dev/mysql1-0.20.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "mysql_client",
+      "rootUri": "file:///C:/Users/lvbhk/AppData/Local/Pub/Cache/hosted/pub.dev/mysql_client-0.0.27",
+      "packageUri": "lib/",
+      "languageVersion": "2.16"
     },
     {
       "name": "node_preamble",
@@ -260,6 +278,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "tuple",
+      "rootUri": "file:///C:/Users/lvbhk/AppData/Local/Pub/Cache/hosted/pub.dev/tuple-2.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "typed_data",
       "rootUri": "file:///C:/Users/lvbhk/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.3.2",
       "packageUri": "lib/",
@@ -302,7 +326,7 @@
       "languageVersion": "3.1"
     }
   ],
-  "generated": "2023-11-08T02:04:05.875428Z",
+  "generated": "2023-11-10T05:27:33.051850Z",
   "generator": "pub",
   "generatorVersion": "3.1.2"
 }
