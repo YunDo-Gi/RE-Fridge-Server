@@ -21,6 +21,9 @@ class PantryApi {
 
     // POST: Add ingredient to pantry
     router.post('/', _pantryController.addIngredient);
+
+    // POST: Add ingredient to shopping list
+    router.post('/<pantryId>', _pantryController.addIngredientToCart);
     
     // PATCH: Update ingredient in pantry
     router.patch('/<pantryId>', _pantryController.updateIngredient);
