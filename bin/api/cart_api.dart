@@ -17,7 +17,7 @@ class CartApi {
     router.get('/<cartId>', _cartController.getIngredientById);
 
     // POST: Add ingredient to shopping list
-    router.post('/', _cartController.addIngredient);
+    router.post('/', _cartController.addIngredients);
 
     // POST: Add ingredient to pantry
     router.post('/<cartId>', _cartController.addIngredientToPantry);

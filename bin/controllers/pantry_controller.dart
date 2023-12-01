@@ -21,6 +21,7 @@ class PantryController {
       var query =
           'select p.pantry_id, i.name, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id';
       var result = await connObj.execute(query);
+
       if (result.rows.isNotEmpty) {
         for (final row in result.rows) {
           var ingredient = toJson(row.colAt(0), row.colAt(1), row.colAt(2),
@@ -33,6 +34,7 @@ class PantryController {
             json.encode({'success': true, 'data': categorizedData}),
             headers: {'Content-Type': 'application/json'});
       } else {
+        // 404: Not Found
         return Response.notFound(
             json.encode({'success': false, 'error': 'No ingredients found'}));
       }
@@ -292,8 +294,8 @@ class PantryController {
 
       var result = await connObj.execute(query);
       if (result.affectedRows == BigInt.from(1)) {
-        // 201: Created
-        return Response(201,
+        // 200: OK
+        return Response(200,
             body: json.encode({'success': true}),
             headers: {'Content-Type': 'application/json'});
       } else {
