@@ -76,6 +76,35 @@ class RecipeController {
     }
   }
 
+  getNeededIngredients(Request req, String recipeId) async {
+    final recipeIdN = int.tryParse(recipeId);
+    final recipeData = data.firstWhere(
+        (element) => element['recipeId'] == recipeIdN,
+        orElse: () => null);
+
+    // 404: Not Found
+    if (recipeData == null) {
+      return Response.notFound(json
+          .encode({'success': false, 'error': 'Recipe $recipeId not found'}));
+    }
+
+    // 200: OK
+    else {
+      final List neededIngredients = [];
+      for (var ingredient in recipeData['ingredients']) {
+        if (!pantry.contains(ingredient)) {
+          neededIngredients.add(ingredient);
+        } else {
+          continue;
+        }
+      }
+
+      return Response.ok(
+          json.encode({'success': true, 'data': neededIngredients}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
   Future<Response> addRecipe(Request req) async {
     final payload = await req.readAsString();
     final Map<String, dynamic> recipe = json.decode(payload);

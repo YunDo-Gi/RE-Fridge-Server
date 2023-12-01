@@ -32,6 +32,7 @@ class DBSetup {
     }
     // close all connections
     await conn.close();
+    print("Connection closed");
   }
 
   Future<MySQLConnection> dbConnector() async {
@@ -47,6 +48,7 @@ class DBSetup {
 
     try {
       await conn.connect();
+      print("dbConnector: Connected");
       return conn;
     } catch (e) {
       throw Exception("Exception: $e");

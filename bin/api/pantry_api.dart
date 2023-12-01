@@ -17,19 +17,19 @@ class PantryApi {
     router.get('/<category>', _pantryController.getIngredientsByCategory);
 
     // Show specific ingredient in pantry
-    router.get('/<pantryId>', _pantryController.getIngredientById);
+    router.get('/ingredient/<ingredientId>', _pantryController.getIngredientById);
 
     // POST: Add ingredient to pantry
-    router.post('/', _pantryController.addIngredient);
+    router.post('/', _pantryController.addIngredients);
 
     // POST: Add ingredient to shopping list
-    router.post('/<pantryId>', _pantryController.addIngredientToCart);
+    router.post('/<ingredientId>', _pantryController.addIngredientToCart);
     
     // PATCH: Update ingredient in pantry
-    router.patch('/<pantryId>', _pantryController.updateIngredient);
+    router.patch('/<ingredientId>', _pantryController.updateIngredient);
 
     // DELETE: Delete ingredient from pantry
-    router.delete('/<pantryId>', _pantryController.deleteIngredient);
+    router.delete('/<ingredientId>', _pantryController.deleteIngredient);
         
 
     return router;

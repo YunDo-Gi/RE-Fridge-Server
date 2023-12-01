@@ -16,7 +16,7 @@ class RecipeApi {
     // GET: Show recipes that fullfill more than half of ingredients needed
     router.get('/fullfill', _recipeController.getFullfilledRecipes);
 
-    // Show specific recipe
+    // GET: Show specific recipe
     router.get('/<recipeId>', _recipeController.getRecipeById);
 
     // POST: Add recipe
