@@ -19,13 +19,13 @@ class PantryController {
 
     try {
       var query =
-          'select p.pantry_id, i.name, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id';
+          'select p.pantry_id, i.name, i.icon, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id';
       var result = await connObj.execute(query);
 
       if (result.rows.isNotEmpty) {
         for (final row in result.rows) {
           var ingredient = toJson(row.colAt(0), row.colAt(1), row.colAt(2),
-              row.colAt(3), row.colAt(4));
+              row.colAt(3), row.colAt(4), row.colAt(5));
           print(row.assoc());
           categorizedData.add(ingredient);
         }
@@ -59,12 +59,12 @@ class PantryController {
       } else {
         final List categorizedData = [];
         var query =
-            'select p.pantry_id, i.name, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id and c.name = "$category"';
+            'select p.pantry_id, i.name, i.icon, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id and c.name = "$category"';
         var result = await connObj.execute(query);
         if (result.rows.isNotEmpty) {
           for (final row in result.rows) {
             var ingredient = toJson(row.colAt(0), row.colAt(1), row.colAt(2),
-                row.colAt(3), row.colAt(4));
+                row.colAt(3), row.colAt(4), row.colAt(5));
             print(row.assoc());
             categorizedData.add(ingredient);
           }
@@ -99,7 +99,7 @@ class PantryController {
 
       final ingredientIdN = int.tryParse(ingredientId);
       var query =
-          'select p.pantry_id, i.name, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id and p.pantry_ingredient_id = $ingredientIdN';
+          'select p.pantry_id, i.name, i.icon, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id and p.pantry_ingredient_id = $ingredientIdN';
       var result = await connObj.execute(query);
       if (result.rows.isNotEmpty) {
         final ingredientData = toJson(
@@ -107,7 +107,8 @@ class PantryController {
             result.rows.first.colAt(1),
             result.rows.first.colAt(2),
             result.rows.first.colAt(3),
-            result.rows.first.colAt(4));
+            result.rows.first.colAt(4),
+            result.rows.first.colAt(5));
         // 200: OK
         return Response.ok(
             json.encode({'success': true, 'data': ingredientData}),
@@ -132,7 +133,9 @@ class PantryController {
 
     try {
       final payload = await req.readAsString();
-      final List<Map<String, dynamic>> ingredients = List<Map<String, dynamic>>.from(json.decode(payload).map((item) => item as Map<String, dynamic>));
+      final List<Map<String, dynamic>> ingredients =
+          List<Map<String, dynamic>>.from(
+              json.decode(payload).map((item) => item as Map<String, dynamic>));
       print('ingredients added');
 
       // 400: Bad Request
@@ -213,7 +216,7 @@ class PantryController {
 
     try {
       // 400: Bad Request
-      if(ingredientId.isEmpty) {
+      if (ingredientId.isEmpty) {
         return Response.notFound(
             json.encode({'success': false, 'error': 'Ingredient is empty'}));
       }
@@ -282,9 +285,9 @@ class PantryController {
     final conn = _db.dbConnector();
     var connObj = await conn;
 
-    try{
+    try {
       // 400: Bad Request
-      if(ingredientId.isEmpty) {
+      if (ingredientId.isEmpty) {
         return Response.notFound(
             json.encode({'success': false, 'error': 'Ingredient is empty'}));
       }
@@ -316,9 +319,10 @@ class PantryController {
   }
 }
 
-toJson(id, name, date, quantity, category) => {
+toJson(id, name, icon, date, quantity, category) => {
       'ingredientId': id,
       'ingredientName': name,
+      'icon': icon,
       'expiryDate': date,
       'quantity': quantity,
       'category': category

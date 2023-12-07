@@ -11,6 +11,8 @@ class RecipeController {
     // 200: OK
     return Response.ok(json.encode({'success': true, 'data': data}),
         headers: {'Content-Type': 'application/json'});
+
+        // select r.recipe_id, r.name, group_concat(i.name) as ingredients from recipe r join recipe_ingredient ri on r.recipe_id = ri.recipe_id join ingredient i on i.ingredient_id = ri.ingredient_id group by r.recipe_id
   }
 
   getFullfilledRecipes(Request req) async {

@@ -19,12 +19,13 @@ class CartController {
 
     try {
       var query =
-          'select c.cart_ingredient_id, i.name from ingredient i, cart_ingredient c where c.ingredient_id = i.ingredient_id';
+          'select c.cart_ingredient_id, i.name, i.icon from ingredient i, cart_ingredient c where c.ingredient_id = i.ingredient_id';
       var result = await connObj.execute(query);
 
       if (result.rows.isNotEmpty) {
         for (final row in result.rows) {
-          var ingredient = toJson(row.colAt(0), row.colAt(1));
+          var ingredient = toJson(row.colAt(0), row.colAt(1), row.colAt(2));
+          print(row.assoc());
           ingredients.add(ingredient);
         }
         // 200: OK
@@ -248,7 +249,8 @@ class CartController {
   }
 }
 
-toJson(id, name) => {
+toJson(id, name, icon) => {
       'cartId': id,
       'ingredientName': name,
+      'icon': icon
     };
