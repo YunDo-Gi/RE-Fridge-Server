@@ -54,16 +54,16 @@ You should see the logging printed in the first terminal:
 RE-Fridge-Server
 └─📦 bin
    ├─ 📂 api
-   │  ├─ 📜 cart_api.dart
-   │  ├─ 📜 init_api.dart
-   │  ├─ 📜 pantry_api.dart
-   │  └─ 📜 recipe_api.dart
+   │  ├─ 📄 cart_api.dart
+   │  ├─ 📄 init_api.dart
+   │  ├─ 📄 pantry_api.dart
+   │  └─ 📄 recipe_api.dart
    ├─ 📂 controllers
-   │  ├─ 📜 cart_controller.dart
-   │  ├─ 📜 pantry_controller.dart
-   │  └─ 📜 recipe_controller.dart
+   │  ├─ 📄 cart_controller.dart
+   │  ├─ 📄 pantry_controller.dart
+   │  └─ 📄 recipe_controller.dart
    ├─ 📂 db
-   │  └─ 📜 setup_db.dart
-   ├─ 📜 server.dart
+   │  └─ 📄 setup_db.dart
+   ├─ 📄 server.dart
    └─ 📂 utils
 ```
