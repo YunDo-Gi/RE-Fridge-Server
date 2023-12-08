@@ -16,7 +16,7 @@ class PantryApi {
     // GET: Show specific category in pantry
     router.get('/<category>', _pantryController.getIngredientsByCategory);
 
-    // Show specific ingredient in pantry
+    // GET: Show specific ingredient information in pantry
     router.get('/ingredient/<ingredientId>', _pantryController.getIngredientById);
 
     // POST: Add ingredient to pantry

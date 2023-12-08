@@ -199,7 +199,7 @@ class PantryController {
 
       // 201: Created
       return Response(201,
-          body: json.encode({'success': true, 'data': addedIngredients}),
+          body: json.encode({'success': true}),
           headers: {'Content-Type': 'application/json'});
     } catch (e) {
       print("Exception: $e");
@@ -275,7 +275,7 @@ class PantryController {
 
       File('pantry.json').writeAsStringSync(json.encode(data));
 
-      return Response.ok(json.encode({'success': true, 'data': ingredientData}),
+      return Response.ok(json.encode({'success': true}),
           headers: {'Content-Type': 'application/json'});
     }
   }

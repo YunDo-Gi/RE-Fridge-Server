@@ -1,24 +1,79 @@
 import 'dart:io';
 import 'dart:convert';
-
 import 'package:shelf/shelf.dart';
 
+import '../db/setup_db.dart';
+
+final _db = DBSetup();
+
 class RecipeController {
+  // Test data
   final List data = json.decode(File('recipe.json').readAsStringSync());
   final List pantry = json.decode(File('pantry.json').readAsStringSync());
 
-  getAllRecipes(Request req) {
-    // 200: OK
-    return Response.ok(json.encode({'success': true, 'data': data}),
-        headers: {'Content-Type': 'application/json'});
+  Future getAllRecipes(Request req) async {
+    // Connect to database
+    final conn = _db.dbConnector();
+    var connObj = await conn;
 
-        // select r.recipe_id, r.name, group_concat(i.name) as ingredients from recipe r join recipe_ingredient ri on r.recipe_id = ri.recipe_id join ingredient i on i.ingredient_id = ri.ingredient_id group by r.recipe_id
+    final List recipes = [];
+
+    // Get all recipes
+    try {
+      var query =
+          'select r.recipe_id, r.name, group_concat(i.name) as ingredients from recipe r join recipe_ingredient ri on r.recipe_id = ri.recipe_id join ingredient i on i.ingredient_id = ri.ingredient_id group by r.recipe_id';
+      var result = await connObj.execute(query);
+
+      if (result.rows.isNotEmpty) {
+        for (final row in result.rows) {
+          var recipe = toJson(
+            row.colAt(0),
+            row.colAt(1),
+            row.colAt(2),
+          );
+          print(row.assoc());
+          recipes.add(recipe);
+        }
+        // 200: OK
+        return Response.ok(json.encode({'success': true, 'data': recipes}),
+            headers: {'Content-Type': 'application/json'});
+      } else {
+        // 404: Not Found
+        return Response.notFound(
+            json.encode({'success': false, 'error': 'No recipe found'}));
+      }
+    } catch (e) {
+      print("Exception: $e");
+    } finally {
+      await connObj.close();
+      print("dbConnector: Connection closed");
+    }
   }
 
   getFullfilledRecipes(Request req) async {
+    // Connect to database
+    final conn = _db.dbConnector();
+    var connObj = await conn;
+
     final List ingredients = [];
-    for (var ingredient in pantry) {
-      ingredients.add(ingredient['ingredientName']);
+
+    // Get all ingredients
+    try {
+      var query =
+          'select i.name from pantry_ingredient pi, ingredient i where pi.ingredient_id = i.ingredient_id';
+      var result = await connObj.execute(query);
+
+      if (result.rows.isNotEmpty) {
+        for (final row in result.rows) {
+          ingredients.add(row.colAt(0));
+        }
+      } else {
+        // 404: Not Found
+        return Response.notFound(
+            json.encode({'success': false, 'error': 'No ingredient found'}));
+      }
+    } catch (e) {
+      print("Exception: $e");
     }
 
     // 400: Bad Request
@@ -30,23 +85,57 @@ class RecipeController {
 
     // 200: OK
     else {
+      final List recipes = [];
       final List fullfilledRecipes = [];
-      // Check if recipe contains ingredients
-      for (var recipe in data) {
-        var count = 0;
-        for (var ingredient in recipe['ingredients']) {
-          if (ingredients.contains(ingredient)) {
-            count++;
-          } else {
-            continue;
+
+      try {
+        var query =
+            'select r.recipe_id, r.name, group_concat(i.name) as ingredients from recipe r join recipe_ingredient ri on r.recipe_id = ri.recipe_id join ingredient i on i.ingredient_id = ri.ingredient_id group by r.recipe_id';
+        var result = await connObj.execute(query);
+
+        if (result.rows.isNotEmpty) {
+          for (final row in result.rows) {
+            var recipe = toJson(
+              row.colAt(0),
+              row.colAt(1),
+              row.colAt(2),
+            );
+            recipes.add(recipe);
           }
-        }
-        if (recipe['ingredients'].length / 2 <= count) {
-          recipe['fullfillCount'] = count;
-          fullfilledRecipes.add(recipe);
+
+          // Count number of fullfilled ingredients
+          for (var recipe in recipes) {
+            var count = 0;
+            for (var ingredient in recipe['ingredients']) {
+              if (ingredients.contains(ingredient)) {
+                count++;
+              } else {
+                continue;
+              }
+            }
+
+            // Add fullfill count to recipe
+            recipe['fullfillCount'] = count;
+            fullfilledRecipes.add(recipe);
+
+            // Add recipe to fullfilledRecipes if at least half of the ingredients are fullfilled
+            // if (recipe['ingredients'].length / 2 <= count) {
+            //   recipe['fullfillCount'] = count;
+            //   fullfilledRecipes.add(recipe);
+            // } else {
+            //   continue;
+            // }
+          }
         } else {
-          continue;
+          // 404: Not Found
+          return Response.notFound(
+              json.encode({'success': false, 'error': 'No recipe found'}));
         }
+      } catch (e) {
+        print("Exception: $e");
+      } finally {
+        await connObj.close();
+        print("dbConnector: Connection closed");
       }
 
       // Sort recipes by number of fullfilled ingredients
@@ -159,4 +248,14 @@ class RecipeController {
           headers: {'Content-Type': 'application/json'});
     }
   }
+}
+
+toJson(recipeId, recipeName, ingredients) {
+  List<String> ingredientsList = ingredients.split(",");
+
+  return {
+    'recipeId': recipeId,
+    'recipeName': recipeName,
+    'ingredients': ingredientsList,
+  };
 }
