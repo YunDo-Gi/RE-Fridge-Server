@@ -1,5 +1,6 @@
 import 'package:mysql_client/mysql_client.dart';
 
+
 // How to print result
 // print(result.numOfColumns);
 // print(result.numOfRows);
@@ -25,6 +26,7 @@ class DBSetup {
     );
 
     try {
+      // open connection
       await conn.connect();
       print("Connected");
     } catch (e) {
@@ -55,5 +57,31 @@ class DBSetup {
     }
   }
 
-  pantryRef() {}
+  // get result from query
+  Future<IResultSet> query(String query) async {
+    final conn = await dbConnector();
+    try {
+      final results = await conn.execute(query);
+      print("query: $query");
+      await conn.close();
+      print("query: Connection closed");
+      return results;
+    } catch (e) {
+      throw Exception("Exception: $e");
+    }
+  }
+
+  // get result from query with params
+  Future<PreparedStmt> queryWithParams(String query, List<dynamic> params) async {
+    final conn = await dbConnector();
+    try {
+      final results = await conn.prepare(query, params as bool);
+      print("query: $query");
+      await conn.close();
+      print("query: Connection closed");
+      return results;
+    } catch (e) {
+      throw Exception("Exception: $e");
+    }
+  }
 }

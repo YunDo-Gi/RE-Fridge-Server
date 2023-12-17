@@ -7,7 +7,6 @@ final _cartController = CartController();
 
 class CartApi {
   Handler get handler {
-
     var router = Router();
 
     // GET: Show all ingredients in shopping list

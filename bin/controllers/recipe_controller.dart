@@ -196,14 +196,14 @@ class RecipeController {
     }
   }
 
+  // functions for future development
+
   Future<Response> addRecipe(Request req) async {
     final payload = await req.readAsString();
     final Map<String, dynamic> recipe = json.decode(payload);
 
     // 400: Bad Request
-    if (recipe['recipeId'] == null ||
-        recipe['recipeName'] == null ||
-        recipe['ingredients'] == null) {
+    if (recipe['recipeName'] == null || recipe['ingredients'] == null) {
       return Response.badRequest(
           body: json.encode(
               {'success': false, 'error': 'Invalid recipe data provided'}),
@@ -220,16 +220,113 @@ class RecipeController {
           headers: {'Content-Type': 'application/json'});
     }
 
-    // 201: Created
-    else {
-      data.add(recipe);
-      return Response(HttpStatus.created,
-          body: json.encode({'success': true, 'data': recipe}),
-          headers: {'Content-Type': 'application/json'});
+    // Connect to database
+    final conn = _db.dbConnector();
+    var connObj = await conn;
+
+    // Add recipe
+    try {
+      var query =
+          'insert into recipe (recipe_id, name) values (null, "${recipe['recipeName']}")';
+      var result = await connObj.execute(query);
+      print(result.rows.first.colAt(0));
+
+      if (result.rows.isEmpty) {
+        // 404: Not Found
+        return Response.notFound(
+            json.encode({'success': false, 'error': 'Recipe not found'}));
+      } else {
+        var recipeId = result.rows.first.colAt(0);
+        print("Recipe added");
+        // Add recipe ingredients
+        try {
+          for (var ingredient in recipe['ingredients']) {
+            var query =
+                "select ingredient_id from ingredient where name = '$ingredient'";
+            var result = await connObj.execute(query);
+
+            if (result.rows.isEmpty) {
+              // 404: Not Found
+              return Response.notFound(json
+                  .encode({'success': false, 'error': 'Ingredient not found'}));
+            } else {
+              var ingredientId = result.rows.first.colAt(0);
+              query =
+                  'insert into recipe_ingredient (recipe_ingredient_id, recipe_id, ingredient_id) values (null, $recipeId, $ingredientId)';
+              result = await connObj.execute(query);
+
+              if (result.rows.isEmpty) {
+                // 404: Not Found
+                return Response.notFound(json.encode({
+                  'success': false,
+                  'error': 'Ingredient $ingredient not found'
+                }));
+              } else {
+                // 201: Created
+                return Response(201,
+                    body: json.encode({'success': true}),
+                    headers: {'Content-Type': 'application/json'});
+              }
+            }
+          }
+        } catch (e) {
+          print("Exception: $e");
+        }
+      }
+    } catch (e) {
+      print("Exception: $e");
+    } finally {
+      await connObj.close();
+      print("dbConnector: Connection closed");
+    }
+
+    return Response(201,
+        body: json.encode({'success': true, 'data': recipe}),
+        headers: {'Content-Type': 'application/json'});
+  }
+
+  Future<Response> deleteRecipe(Request req, String recipeId) async {
+    final recipeIdN = int.tryParse(recipeId);
+    final recipeData = data.firstWhere(
+        (element) => element['recipeId'] == recipeIdN,
+        orElse: () => null);
+
+    // 404: Not Found
+    if (recipeData == null) {
+      return Response.notFound(json
+          .encode({'success': false, 'error': 'Recipe $recipeId not found'}));
+    } else {
+      // Connect to database
+      final conn = _db.dbConnector();
+      var connObj = await conn;
+
+      try {
+        var query = 'delete from recipe where recipe_id = $recipeIdN';
+        var result = await connObj.execute(query);
+
+        if (result.rows.isEmpty) {
+          // 404: Not Found
+          return Response.notFound(
+              json.encode({'success': false, 'error': 'Recipe not found'}));
+        } else {
+          print("Recipe deleted");
+          // 200: OK
+          return Response.ok(json.encode({'success': true}),
+              headers: {'Content-Type': 'application/json'});
+        }
+      } catch (e) {
+        print("Exception: $e");
+
+        return Response.notFound(
+            json.encode({'success': false, 'error': 'Recipe not found'}));
+      } finally {
+        await connObj.close();
+        print("dbConnector: Connection closed");
+      }
     }
   }
 
-  deleteRecipe(Request req, String recipeId) {
+  updateRecipe(Request req, String recipeId) async {
     final recipeIdN = int.tryParse(recipeId);
     final recipeData = data.firstWhere(
         (element) => element['recipeId'] == recipeIdN,
@@ -241,10 +338,321 @@ class RecipeController {
           .encode({'success': false, 'error': 'Recipe $recipeId not found'}));
     }
 
+    // 400: Bad Request
+    final payload = await req.readAsString();
+    final Map<String, dynamic> recipe = json.decode(payload);
+    if (recipe['recipeName'] == null || recipe['ingredients'] == null) {
+      return Response.badRequest(
+          body: json.encode(
+              {'success': false, 'error': 'Invalid recipe data provided'}),
+          headers: {'Content-Type': 'application/json'});
+    }
+
     // 200: OK
     else {
-      data.remove(recipeData);
+      recipeData['recipeName'] = recipe['recipeName'];
+      recipeData['ingredients'] = recipe['ingredients'];
       return Response.ok(json.encode({'success': true, 'data': recipeData}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
+  addIngredient(Request req, String recipeId) async {
+    final recipeIdN = int.tryParse(recipeId);
+    final recipeData = data.firstWhere(
+        (element) => element['recipeId'] == recipeIdN,
+        orElse: () => null);
+
+    // 404: Not Found
+    if (recipeData == null) {
+      return Response.notFound(json
+          .encode({'success': false, 'error': 'Recipe $recipeId not found'}));
+    }
+
+    // 400: Bad Request
+    final payload = await req.readAsString();
+    final Map<String, dynamic> ingredient = json.decode(payload);
+    if (ingredient['ingredientName'] == null) {
+      return Response.badRequest(
+          body: json.encode(
+              {'success': false, 'error': 'Invalid ingredient data provided'}),
+          headers: {'Content-Type': 'application/json'});
+    }
+
+    // 200: OK
+    else {
+      recipeData['ingredients'].add(ingredient['ingredientName']);
+      return Response.ok(json.encode({'success': true, 'data': recipeData}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
+  deleteIngredient(Request req, String recipeId, String ingredientId) async {
+    final recipeIdN = int.tryParse(recipeId);
+    final recipeData = data.firstWhere(
+        (element) => element['recipeId'] == recipeIdN,
+        orElse: () => null);
+
+    // 404: Not Found
+    if (recipeData == null) {
+      return Response.notFound(json
+          .encode({'success': false, 'error': 'Recipe $recipeId not found'}));
+    }
+
+    // 400: Bad Request
+    final ingredientIdN = int.tryParse(ingredientId);
+    final ingredientData = recipeData['ingredients'].firstWhere(
+        (element) => element['ingredientId'] == ingredientIdN,
+        orElse: () => null);
+    if (ingredientData == null) {
+      return Response.badRequest(
+          body: json.encode({
+            'success': false,
+            'error': 'Ingredient $ingredientId not found'
+          }),
+          headers: {'Content-Type': 'application/json'});
+    }
+
+    // 200: OK
+    else {
+      recipeData['ingredients'].remove(ingredientData);
+      return Response.ok(json.encode({'success': true, 'data': recipeData}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
+  updateIngredient(Request req, String recipeId, String ingredientId) async {
+    final recipeIdN = int.tryParse(recipeId);
+    final recipeData = data.firstWhere(
+        (element) => element['recipeId'] == recipeIdN,
+        orElse: () => null);
+
+    // 404: Not Found
+    if (recipeData == null) {
+      return Response.notFound(json
+          .encode({'success': false, 'error': 'Recipe $recipeId not found'}));
+    }
+
+    // 400: Bad Request
+    final ingredientIdN = int.tryParse(ingredientId);
+    final ingredientData = recipeData['ingredients'].firstWhere(
+        (element) => element['ingredientId'] == ingredientIdN,
+        orElse: () => null);
+    final payload = await req.readAsString();
+    final Map<String, dynamic> ingredient = json.decode(payload);
+    if (ingredientData == null || ingredient['ingredientName'] == null) {
+      return Response.badRequest(
+          body: json.encode(
+              {'success': false, 'error': 'Invalid ingredient data provided'}),
+          headers: {'Content-Type': 'application/json'});
+    }
+
+    // 200: OK
+    else {
+      ingredientData['ingredientName'] = ingredient['ingredientName'];
+      return Response.ok(json.encode({'success': true, 'data': recipeData}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
+  getRecipeByIngredient(Request req, String ingredientId) async {
+    final ingredientIdN = int.tryParse(ingredientId);
+    final ingredientData = pantry.firstWhere(
+        (element) => element['ingredientId'] == ingredientIdN,
+        orElse: () => null);
+
+    // 404: Not Found
+    if (ingredientData == null) {
+      return Response.notFound(json.encode(
+          {'success': false, 'error': 'Ingredient $ingredientId not found'}));
+    }
+
+    // 200: OK
+    else {
+      final List recipes = [];
+      for (var recipe in data) {
+        if (recipe['ingredients'].contains(ingredientData['ingredientName'])) {
+          recipes.add(recipe);
+        } else {
+          continue;
+        }
+      }
+
+      return Response.ok(json.encode({'success': true, 'data': recipes}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
+  getRecipeByIngredients(Request req) async {
+    final payload = await req.readAsString();
+    final Map<String, dynamic> ingredients = json.decode(payload);
+
+    // 400: Bad Request
+    if (ingredients['ingredients'] == null) {
+      return Response.badRequest(
+          body: json.encode(
+              {'success': false, 'error': 'Invalid ingredient data provided'}),
+          headers: {'Content-Type': 'application/json'});
+    }
+
+    // 200: OK
+    else {
+      final List recipes = [];
+      for (var recipe in data) {
+        if (recipe['ingredients'].containsAll(ingredients['ingredients'])) {
+          recipes.add(recipe);
+        } else {
+          continue;
+        }
+      }
+
+      return Response.ok(json.encode({'success': true, 'data': recipes}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
+  getRecipeByIngredientsAnd(Request req) async {
+    final payload = await req.readAsString();
+    final Map<String, dynamic> ingredients = json.decode(payload);
+
+    // 400: Bad Request
+    if (ingredients['ingredients'] == null) {
+      return Response.badRequest(
+          body: json.encode(
+              {'success': false, 'error': 'Invalid ingredient data provided'}),
+          headers: {'Content-Type': 'application/json'});
+    }
+
+    // 200: OK
+    else {
+      final List recipes = [];
+      for (var recipe in data) {
+        if (recipe['ingredients'].containsAll(ingredients['ingredients'])) {
+          recipes.add(recipe);
+        } else {
+          continue;
+        }
+      }
+
+      return Response.ok(json.encode({'success': true, 'data': recipes}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
+  getRecipeByIngredientsOr(Request req) async {
+    final payload = await req.readAsString();
+    final Map<String, dynamic> ingredients = json.decode(payload);
+
+    // 400: Bad Request
+    if (ingredients['ingredients'] == null) {
+      return Response.badRequest(
+          body: json.encode(
+              {'success': false, 'error': 'Invalid ingredient data provided'}),
+          headers: {'Content-Type': 'application/json'});
+    }
+
+    // 200: OK
+    else {
+      final List recipes = [];
+      for (var recipe in data) {
+        if (recipe['ingredients']
+            .any((element) => ingredients['ingredients'].contains(element))) {
+          recipes.add(recipe);
+        } else {
+          continue;
+        }
+      }
+
+      return Response.ok(json.encode({'success': true, 'data': recipes}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
+  getRecipeByIngredientsNot(Request req) async {
+    final payload = await req.readAsString();
+    final Map<String, dynamic> ingredients = json.decode(payload);
+
+    // 400: Bad Request
+    if (ingredients['ingredients'] == null) {
+      return Response.badRequest(
+          body: json.encode(
+              {'success': false, 'error': 'Invalid ingredient data provided'}),
+          headers: {'Content-Type': 'application/json'});
+    }
+
+    // 200: OK
+    else {
+      final List recipes = [];
+      for (var recipe in data) {
+        if (!recipe['ingredients']
+            .any((element) => ingredients['ingredients'].contains(element))) {
+          recipes.add(recipe);
+        } else {
+          continue;
+        }
+      }
+
+      return Response.ok(json.encode({'success': true, 'data': recipes}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
+  getRecipeByIngredientsAndNot(Request req) async {
+    final payload = await req.readAsString();
+    final Map<String, dynamic> ingredients = json.decode(payload);
+
+    // 400: Bad Request
+    if (ingredients['ingredients'] == null) {
+      return Response.badRequest(
+          body: json.encode(
+              {'success': false, 'error': 'Invalid ingredient data provided'}),
+          headers: {'Content-Type': 'application/json'});
+    }
+
+    // 200: OK
+    else {
+      final List recipes = [];
+      for (var recipe in data) {
+        if (!recipe['ingredients'].any(
+                (element) => ingredients['ingredients'].contains(element)) &&
+            recipe['ingredients'].containsAll(ingredients['ingredients'])) {
+          recipes.add(recipe);
+        } else {
+          continue;
+        }
+      }
+
+      return Response.ok(json.encode({'success': true, 'data': recipes}),
+          headers: {'Content-Type': 'application/json'});
+    }
+  }
+
+  getRecipeByIngredientsOrNot(Request req) async {
+    final payload = await req.readAsString();
+    final Map<String, dynamic> ingredients = json.decode(payload);
+
+    // 400: Bad Request
+    if (ingredients['ingredients'] == null) {
+      return Response.badRequest(
+          body: json.encode(
+              {'success': false, 'error': 'Invalid ingredient data provided'}),
+          headers: {'Content-Type': 'application/json'});
+    }
+
+    // 200: OK
+    else {
+      final List recipes = [];
+      for (var recipe in data) {
+        if (!recipe['ingredients'].any(
+                (element) => ingredients['ingredients'].contains(element)) ||
+            recipe['ingredients'].containsAll(ingredients['ingredients'])) {
+          recipes.add(recipe);
+        } else {
+          continue;
+        }
+      }
+
+      return Response.ok(json.encode({'success': true, 'data': recipes}),
           headers: {'Content-Type': 'application/json'});
     }
   }

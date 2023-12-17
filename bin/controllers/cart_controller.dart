@@ -69,15 +69,15 @@ class CartController {
 
     try {
       final payload = await req.readAsString();
-       final List<Map<String, dynamic>> ingredients = List<Map<String, dynamic>>.from(json.decode(payload).map((item) => item as Map<String, dynamic>));
+      final List<Map<String, dynamic>> ingredients =
+          List<Map<String, dynamic>>.from(
+              json.decode(payload).map((item) => item as Map<String, dynamic>));
 
       // 400: Bad Request
       if (ingredients.isEmpty) {
         return Response.badRequest(
-            body: json.encode({
-              'success': false,
-              'error': 'Missing ingredients'
-            }),
+            body:
+                json.encode({'success': false, 'error': 'Missing ingredients'}),
             headers: {'Content-Type': 'application/json'});
       }
 
@@ -99,13 +99,23 @@ class CartController {
           var query =
               'insert into cart_ingredient (cart_ingredient_id, cart_id, ingredient_id) values (null, $cartId, ${ingredient['ingredientId']})';
           var result = await connObj.execute(query);
+          if (result.affectedRows == BigInt.from(1)) {
+            // 201: Created
+            return Response(201,
+                body: json.encode({'success': true}),
+                headers: {'Content-Type': 'application/json'});
+          } else {
+            // 500: Internal Server Error
+            return Response(500,
+                body: json.encode({
+                  'success': false,
+                  'error':
+                      'Failed to add ingredient ${ingredient['ingredientId']}'
+                }),
+                headers: {'Content-Type': 'application/json'});
+          }
         }
-
-        return Response(201,
-            body: json.encode({'success': true, 'data': ingredients}),
-            headers: {'Content-Type': 'application/json'});
       }
-
     } catch (e) {
       print("Exception: $e");
     } finally {
@@ -194,8 +204,8 @@ class CartController {
     try {
       // 404: Not Found
       if (cartId.isEmpty) {
-        return Response.notFound(json.encode(
-            {'success': false, 'error': 'Cart ID not found'}));
+        return Response.notFound(
+            json.encode({'success': false, 'error': 'Cart ID not found'}));
       }
 
       final cartIdN = int.tryParse(cartId);
@@ -217,40 +227,34 @@ class CartController {
             }),
             headers: {'Content-Type': 'application/json'});
       }
-
     } catch (e) {
       print("Exception: $e");
     } finally {
       await connObj.close();
     }
 
-      
+    // Test code
+    //   final ingredientIdN = int.tryParse(ingredientId);
+    //   final ingredientData = data.firstWhere(
+    //       (element) => element['ingredientId'] == ingredientIdN,
+    //       orElse: () => null);
 
-  //   final ingredientIdN = int.tryParse(ingredientId);
-  //   final ingredientData = data.firstWhere(
-  //       (element) => element['ingredientId'] == ingredientIdN,
-  //       orElse: () => null);
+    //   // 404: Not Found
+    //   if (ingredientData == null) {
+    //     return Response.notFound(json.encode(
+    //         {'success': false, 'error': 'Ingredient $ingredientId not found'}));
+    //   }
 
-  //   // 404: Not Found
-  //   if (ingredientData == null) {
-  //     return Response.notFound(json.encode(
-  //         {'success': false, 'error': 'Ingredient $ingredientId not found'}));
-  //   }
+    //   // 200: OK
+    //   else {
+    //     data.remove(ingredientData);
 
-  //   // 200: OK
-  //   else {
-  //     data.remove(ingredientData);
+    //     File('pantry.json').writeAsStringSync(json.encode(data));
 
-  //     File('pantry.json').writeAsStringSync(json.encode(data));
-
-  //     return Response.ok(json.encode({'success': true, 'data': ingredientData}),
-  //         headers: {'Content-Type': 'application/json'});
-  //   }
+    //     return Response.ok(json.encode({'success': true, 'data': ingredientData}),
+    //         headers: {'Content-Type': 'application/json'});
+    //   }
   }
 }
 
-toJson(id, name, icon) => {
-      'cartId': id,
-      'ingredientName': name,
-      'icon': icon
-    };
+toJson(id, name, icon) => {'cartId': id, 'ingredientName': name, 'icon': icon};

@@ -9,7 +9,7 @@ import 'recipe_api.dart';
 class InitApi {
   Handler get handler {
     var router = Router();
-    
+
     router.mount('/ingredient', IngredientApi().handler);
     router.mount('/pantry', PantryApi().handler);
     router.mount('/cart', CartApi().handler);

@@ -1,53 +1,61 @@
-A server app built using [Shelf](https://pub.dev/packages/shelf),
-configured to enable running with [Docker](https://www.docker.com/).
+# RE-Fridge-Server
+RE:Fridge is a mobile application that helps users manage their pantry effciently. It allows users to keep track of the ingredients they have and suggests recipes based on the ingredients they have. This repository contains the server-side code for the RE:Fridge application.
 
-This sample code handles HTTP GET requests to `/` and `/echo/<message>`
-
-# Running the sample
-
-## Running with the Dart SDK
-
-You can run the example with the [Dart SDK](https://dart.dev/get-dart)
-like this:
-
+# 🚀 Getting Started
+### 1. Install Flutter
+### 2. Clone the repository
+```bash
+git clone
 ```
-$ dart run bin/server.dart
-Server listening on port 8080
+### 3. Install dependencies
+```bash
+flutter pub get
 ```
-
-And then from a second terminal:
-```
-$ curl http://0.0.0.0:8080
-Hello, World!
-$ curl http://0.0.0.0:8080/echo/I_love_Dart
-I_love_Dart
+### 4. Run the app
+```bash
+flutter run
 ```
 
-## Running with Docker
+# 📦 Dependencies
+- [shelf](https://pub.dev/packages/shelf)
+- [shelf_router](https://pub.dev/packages/shelf_router)
+- [mysql_client](https://pub.dev/packages/mysql_client)
 
-If you have [Docker Desktop](https://www.docker.com/get-started) installed, you
-can build and run with the `docker` command:
+# 📖 Contribution Guide 
+Thank you for contributing to the RE:Fridge! Please follow this contribution guide to help advance the project together.
 
-```
-$ docker build . -t myserver
-$ docker run -it -p 8080:8080 myserver
-Server listening on port 8080
-```
+## Before Contributing
+- Check the open issues in the issue tracker to see if there are existing tasks or discussions.
+- Consider what modifications or additions are needed, and start a discussion by creating an issue.
 
-And then from a second terminal:
-```
-$ curl http://0.0.0.0:8080
-Hello, World!
-$ curl http://0.0.0.0:8080/echo/I_love_Dart
-I_love_Dart
-```
 
-You should see the logging printed in the first terminal:
+## How to Contribute
+### 1. Fork this repository
+### 2. Clone it to your local environment
+```bash
+git clone https://github.com/YunDo-Gi/RE-Fridge.git
 ```
-2021-05-06T15:47:04.620417  0:00:00.000158 GET     [200] /
-2021-05-06T15:47:08.392928  0:00:00.001216 GET     [200] /echo/I_love_Dart
+### 3. Create a development branch
+```bash
+git checkout -b <branch-name>
 ```
+### 4. Make changes and commit
+```bash
+git add .
+git commit -m "<commit-message>"
+```
+### 5. Push changes
+```bash
+git push origin <branch-name>
+```
+### 6. Create a pull request
+### 7. Wait for the pull request to be reviewed and merged
 
+## Reporting Issues
+Bugs, improvement ideas, and new feature suggestions are all welcome.
+
+Click the `New Issue` button in the issue tracker to create a new issue.
+Provide detailed information about the issue and the environment in which it occurs.
 
 # Project Structure
 ```
@@ -55,11 +63,13 @@ RE-Fridge-Server
 └─📦 bin
    ├─ 📂 api
    │  ├─ 📄 cart_api.dart
+   │  ├─ 📄 ingredient_api.dart
    │  ├─ 📄 init_api.dart
    │  ├─ 📄 pantry_api.dart
    │  └─ 📄 recipe_api.dart
    ├─ 📂 controllers
    │  ├─ 📄 cart_controller.dart
+   │  ├─ 📄 ingredient_controller.dart
    │  ├─ 📄 pantry_controller.dart
    │  └─ 📄 recipe_controller.dart
    ├─ 📂 db

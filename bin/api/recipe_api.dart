@@ -7,7 +7,6 @@ final _recipeController = RecipeController();
 
 class RecipeApi {
   Handler get handler {
-
     var router = Router();
 
     // GET: Show all recipes
@@ -24,7 +23,6 @@ class RecipeApi {
 
     // DELETE: Delete recipe
     router.delete('/<recipeId>', _recipeController.deleteRecipe);
-        
 
     return router;
   }

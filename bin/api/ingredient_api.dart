@@ -7,14 +7,14 @@ final _ingredientController = IngredientController();
 
 class IngredientApi {
   Handler get handler {
-
     var router = Router();
 
-    // GET: Show all ingredients in pantry
+    // GET: Show all ingredients
     router.get('/', _ingredientController.getAllIngredients);
 
-    // GET: Show specific category in pantry
-    router.get('/category/<category>', _ingredientController.getIngredientsByCategory);
+    // GET: Show specific category of ingredients
+    router.get(
+        '/category/<category>', _ingredientController.getIngredientsByCategory);
 
     // GET: Show all tags
     router.get('/tag', _ingredientController.getAllTags);

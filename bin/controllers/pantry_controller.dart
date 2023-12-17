@@ -19,7 +19,7 @@ class PantryController {
 
     try {
       var query =
-          'select p.pantry_id, i.name, i.icon, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id';
+          'select p.pantry_ingredient_id, i.name, i.icon, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id';
       var result = await connObj.execute(query);
 
       if (result.rows.isNotEmpty) {
@@ -59,7 +59,7 @@ class PantryController {
       } else {
         final List categorizedData = [];
         var query =
-            'select p.pantry_id, i.name, i.icon, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id and c.name = "$category"';
+            'select p.pantry_ingredient_id, i.name, i.icon, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id and c.name = "$category"';
         var result = await connObj.execute(query);
         if (result.rows.isNotEmpty) {
           for (final row in result.rows) {
@@ -99,7 +99,7 @@ class PantryController {
 
       final ingredientIdN = int.tryParse(ingredientId);
       var query =
-          'select p.pantry_id, i.name, i.icon, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id and p.pantry_ingredient_id = $ingredientIdN';
+          'select p.pantry_ingredient_id, i.name, i.icon, p.experation_date, p.quantity, c.name as category from pantry_ingredient p, ingredient i, category c where p.ingredient_id = i.ingredient_id and i.category_id = c.category_id and p.pantry_ingredient_id = $ingredientIdN';
       var result = await connObj.execute(query);
       if (result.rows.isNotEmpty) {
         final ingredientData = toJson(
